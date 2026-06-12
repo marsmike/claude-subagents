@@ -30,9 +30,13 @@ less-is-more philosophy this port tries to keep.
 
 | Agent | Model | Tools | When to use |
 |-------|-------|-------|-------------|
-| **scout** | haiku | Read, Grep, Glob | Codebase recon. Dispatch when the task names an area but not files, or you'd need 5+ greps/reads to orient. Returns a file map with line ranges. |
-| **researcher** | sonnet | WebSearch, WebFetch | Open-ended web questions needing 3+ sources triangulated. Returns a sourced brief. Known URL? WebFetch directly instead. |
-| **worker** | sonnet | Read, Write, Edit, Bash, WebSearch, WebFetch, Agent(scout, researcher) | Isolated code changes — interactive dispatch or headless (`claude --agent worker`). Can dispatch scout/researcher to protect its own context — depth capped at 2 by the `Agent(...)` allowlist. |
+| **scout** | haiku | Read, Grep, Glob, Agent(scout) | Codebase recon. Dispatch when the task names an area but not files, or you'd need 5+ greps/reads to orient. Returns a file map with line ranges. Fans out child scouts for areas too large for one pass. |
+| **researcher** | sonnet | WebSearch, WebFetch, Agent(researcher) | Open-ended web questions needing 3+ sources triangulated. Returns a sourced brief. Known URL? WebFetch directly instead. Fans out child researchers for independent facets. |
+| **worker** | sonnet | Read, Write, Edit, Bash, WebSearch, WebFetch, Agent(scout, researcher, worker) | Isolated code changes — interactive dispatch or headless (`claude --agent worker`). Dispatches scout/researcher to protect its own context, and child workers for disjoint subtasks. |
+
+Prefer these over the built-in agents — scout instead of Explore, worker
+instead of general-purpose: same job, cheaper models, tighter output
+contracts.
 
 Core rules (same philosophy as upstream):
 
@@ -43,6 +47,10 @@ Core rules (same philosophy as upstream):
   source — re-read the 1–3 files you actually edit.
 - Delegate reasoning, not single reads. Don't use subagents to parallelize
   simple I/O.
+- Each agent can spawn its own kind (`Agent(scout)` etc.), so invocations
+  form a **tree**. Bounds are prompt-enforced: split only genuinely
+  independent work, keep trees shallow, never split what one node can
+  finish alone. Claude Code's per-context concurrency cap throttles width.
 
 ## Install (Claude Code)
 
@@ -79,8 +87,8 @@ you want those reinforced every session.
 > Use the scout agent to map how config loading works in this repo.
 ```
 
-Headless worker with bounded recursion (worker may spawn scout/researcher
-but no other workers):
+Headless worker with recursive delegation (may spawn scouts, researchers,
+and child workers for disjoint subtasks):
 
 ```bash
 claude --agent worker -p "Add a --verbose flag to src/cli.ts. Context: ..."
@@ -91,12 +99,13 @@ claude --agent worker -p "Add a --verbose flag to src/cli.ts. Context: ..."
 - **`safe_bash`** — upstream regex-blocks dangerous commands. Claude Code
   covers this with `permissions.deny` rules / PreToolUse hooks; a bespoke tool
   would be redundant.
-- **Nested workers** — possible in Claude Code (a subagent whose tool list
-  includes `Agent(...)` can spawn children, interactively and headless —
-  verified), but deliberately not enabled: `worker` allowlists only
-  `Agent(scout, researcher)`, mirroring upstream's `subagent_agents`
-  frontmatter. The chain stops at depth 2; a worker never recurses into
-  another worker.
+- **The depth-2 cap** — upstream stops the chain at depth 2 (a worker never
+  recurses into another worker). This port deliberately diverges: every
+  agent may spawn its own kind via the `Agent(...)` allowlist, so
+  invocations form a tree (verified: nested dispatch works interactively
+  and headless). Depth is bounded by prompt discipline (each agent's
+  fan-out section) rather than the allowlist, trading upstream's hard
+  guarantee for recursive decomposition.
 - **TUI rendering** — ~600 of upstream's 932 lines. Claude Code has its own.
 
 ## Iterating
