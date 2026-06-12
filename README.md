@@ -32,7 +32,7 @@ less-is-more philosophy this port tries to keep.
 |-------|-------|-------|-------------|
 | **scout** | haiku | Read, Grep, Glob | Codebase recon. Dispatch when the task names an area but not files, or you'd need 5+ greps/reads to orient. Returns a file map with line ranges. |
 | **researcher** | sonnet | WebSearch, WebFetch | Open-ended web questions needing 3+ sources triangulated. Returns a sourced brief. Known URL? WebFetch directly instead. |
-| **worker** | sonnet | Read, Write, Edit, Bash, WebSearch, WebFetch, Agent(scout, researcher) | Isolated code changes, mainly headless (`claude --agent worker`). Can dispatch scout/researcher to protect its own context — depth capped at 2 by the `Agent(...)` allowlist. |
+| **worker** | sonnet | Read, Write, Edit, Bash, WebSearch, WebFetch, Agent(scout, researcher) | Isolated code changes — interactive dispatch or headless (`claude --agent worker`). Can dispatch scout/researcher to protect its own context — depth capped at 2 by the `Agent(...)` allowlist. |
 
 Core rules (same philosophy as upstream):
 
@@ -65,10 +65,12 @@ cp agents/*.md /path/to/project/.claude/agents/
 
 If the same agent name exists in both scopes, the project-level file wins.
 
-**2. Teach the main session when to dispatch** — paste `snippets/CLAUDE.md`
-into your global `~/.claude/CLAUDE.md` (or the project's `CLAUDE.md` for
-project scope). Without this, the agents exist but Claude rarely reaches
-for them unprompted.
+**2. (Optional) reinforce the discipline** — Claude Code routes to agents
+natively via their `description` frontmatter, which carries the dispatch
+criteria. The short `snippets/CLAUDE.md` adds only the cross-cutting rules
+(zero-context prompts, parallel fan-out, scout-to-find-read-to-edit) — paste
+it into your global `~/.claude/CLAUDE.md` (or the project's `CLAUDE.md`) if
+you want those reinforced every session.
 
 **3. Verify** — start a new session (agents are loaded at session start):
 
@@ -89,12 +91,12 @@ claude --agent worker -p "Add a --verbose flag to src/cli.ts. Context: ..."
 - **`safe_bash`** — upstream regex-blocks dangerous commands. Claude Code
   covers this with `permissions.deny` rules / PreToolUse hooks; a bespoke tool
   would be redundant.
-- **Nested workers** — Claude Code subagents can't spawn subagents in
-  interactive sessions. Doesn't matter: interactively, the *main session* is
-  the worker (it has edit tools + the Agent tool). The `worker` agent exists
-  for headless `claude --agent worker` runs, where the `Agent(scout,
-  researcher)` allowlist gives the same bounded recursion as upstream's
-  `subagent_agents` frontmatter.
+- **Nested workers** — possible in Claude Code (a subagent whose tool list
+  includes `Agent(...)` can spawn children, interactively and headless —
+  verified), but deliberately not enabled: `worker` allowlists only
+  `Agent(scout, researcher)`, mirroring upstream's `subagent_agents`
+  frontmatter. The chain stops at depth 2; a worker never recurses into
+  another worker.
 - **TUI rendering** — ~600 of upstream's 932 lines. Claude Code has its own.
 
 ## Iterating

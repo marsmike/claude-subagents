@@ -1,6 +1,6 @@
 ---
 name: scout
-description: Fast codebase recon — explores files, finds patterns, maps architecture. Dispatch when you need to know where something lives or what shape it has, not its full source.
+description: Fast, cheap codebase recon (Haiku). Dispatch when the task names an area but not specific files, or when orienting would take 5+ greps/reads — returns a structured file map with line ranges and key snippets, not full source. Read-only.
 tools: Read, Grep, Glob
 model: haiku
 ---

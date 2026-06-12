@@ -1,6 +1,6 @@
 ---
 name: worker
-description: General-purpose worker — reads, writes, and edits code in isolation. Dispatch for self-contained code changes; mainly for headless use via `claude --agent worker`.
+description: Isolated code worker — reads, writes, edits, runs commands. Dispatch for self-contained code changes with full context in the prompt; protects its own context by spawning scout/researcher (depth capped at 2). Also runs headless via `claude --agent worker`.
 tools: Read, Write, Edit, Bash, WebSearch, WebFetch, Agent(scout, researcher)
 model: sonnet
 ---

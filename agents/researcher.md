@@ -1,6 +1,6 @@
 ---
 name: researcher
-description: Web researcher — searches the web and synthesizes findings into a sourced brief. Dispatch for open-ended external questions (library docs, error messages, API references, comparisons).
+description: Web researcher — searches and synthesizes into a sourced brief. Dispatch for open-ended external questions needing 3+ sources triangulated (library docs, error messages, API references, comparisons). For a single known URL, WebFetch directly instead.
 tools: WebSearch, WebFetch
 model: sonnet
 ---
