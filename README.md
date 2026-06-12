@@ -27,15 +27,45 @@ Core rules (same philosophy as upstream):
 - Delegate reasoning, not single reads. Don't use subagents to parallelize
   simple I/O.
 
-## Install
+## Install (Claude Code)
+
+Subagents are plain markdown files — installing means putting them where
+Claude Code scans for agent definitions.
+
+**1. Get the agent files in place** — pick one:
 
 ```bash
-./install.sh        # symlinks agents/*.md into ~/.claude/agents/
+# a) Symlink (recommended for iterating — repo edits go live immediately)
+git clone https://github.com/marsmike/claude-subagents.git
+cd claude-subagents && ./install.sh
+
+# b) Copy, user scope (available in every project)
+cp agents/*.md ~/.claude/agents/
+
+# c) Copy, project scope (this project only, shareable via git)
+cp agents/*.md /path/to/project/.claude/agents/
 ```
 
-Symlinks (not copies) so edits in this repo go live immediately — that's the
-iterate loop. Then paste `snippets/CLAUDE.md` into your global
-`~/.claude/CLAUDE.md` so the main session knows when to dispatch.
+If the same agent name exists in both scopes, the project-level file wins.
+
+**2. Teach the main session when to dispatch** — paste `snippets/CLAUDE.md`
+into your global `~/.claude/CLAUDE.md` (or the project's `CLAUDE.md` for
+project scope). Without this, the agents exist but Claude rarely reaches
+for them unprompted.
+
+**3. Verify** — start a new session (agents are loaded at session start):
+
+```
+/agents                              # scout, researcher, worker should be listed
+> Use the scout agent to map how config loading works in this repo.
+```
+
+Headless worker with bounded recursion (worker may spawn scout/researcher
+but no other workers):
+
+```bash
+claude --agent worker -p "Add a --verbose flag to src/cli.ts. Context: ..."
+```
 
 ## What deliberately didn't port
 
