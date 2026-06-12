@@ -9,6 +9,23 @@ isolated processes and renders its own TUI. Claude Code ships all of that
 natively (`.claude/agents/`, the Agent tool, parallel dispatch), so the port
 is just the three system prompts. No code.
 
+## Origin & credits
+
+The idea and the agent prompts come from
+[amosblomqvist/pi-subagents](https://github.com/amosblomqvist/pi-subagents):
+instead of a heavyweight orchestration framework, register **one tool and
+three agents** — a cheap read-only scout, a web researcher, and a worker —
+each running in full isolation with zero inherited context, parallelized by
+emitting multiple calls in one turn, with recursion bounded at depth 2 (a
+worker may spawn scouts/researchers, never another worker). The prompts in
+`agents/` are adapted nearly verbatim from that repo; the delegation playbook
+("scout to find, read to edit") is its core contribution.
+
+pi-subagents is an extension for [pi](https://github.com/badlogic/pi-mono),
+Mario Zechner's deliberately minimal coding agent ([design
+notes](https://mariozechner.at/posts/2025-11-30-pi-coding-agent/)) — the same
+less-is-more philosophy this port tries to keep.
+
 ## Agents
 
 | Agent | Model | Tools | When to use |
