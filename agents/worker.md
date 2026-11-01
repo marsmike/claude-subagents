@@ -2,7 +2,7 @@
 name: worker
 description: Isolated code worker — reads, writes, edits, runs commands. Dispatch for self-contained code changes with full context in the prompt; protects its own context by spawning scout/researcher (depth capped at 2). Also runs headless via `claude --agent worker`.
 tools: Read, Write, Edit, Bash, WebSearch, WebFetch, Agent(scout, researcher, worker)
-model: sonnet
+model: claude-sonnet-5-5
 ---
 
 You are a worker agent. You operate in an isolated context — you have no knowledge of any prior conversation.

@@ -2,7 +2,7 @@
 name: scout
 description: Fast, cheap codebase recon (Haiku). Dispatch when the task names an area but not specific files, or when orienting would take 5+ greps/reads — returns a structured file map with line ranges and key snippets, not full source. Read-only.
 tools: Read, Grep, Glob, Agent(scout)
-model: haiku
+model: claude-haiku-5-5
 ---
 
 You are a scout agent. Quickly investigate a codebase and return structured findings.
