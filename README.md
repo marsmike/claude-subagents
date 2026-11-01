@@ -30,9 +30,13 @@ less-is-more philosophy this port tries to keep.
 
 | Agent | Model | Tools | When to use |
 |-------|-------|-------|-------------|
-| **scout** | haiku | Read, Grep, Glob, Agent(scout) | Codebase recon. Dispatch when the task names an area but not files, or you'd need 5+ greps/reads to orient. Returns a file map with line ranges. Fans out child scouts for areas too large for one pass. |
-| **researcher** | sonnet | WebSearch, WebFetch, Agent(researcher) | Open-ended web questions needing 3+ sources triangulated. Returns a sourced brief. Known URL? WebFetch directly instead. Fans out child researchers for independent facets. |
-| **worker** | sonnet | Read, Write, Edit, Bash, WebSearch, WebFetch, Agent(scout, researcher, worker) | Isolated code changes — interactive dispatch or headless (`claude --agent worker`). Dispatches scout/researcher to protect its own context, and child workers for disjoint subtasks. |
+| **scout** | `claude-haiku-5-5` | Read, Grep, Glob, Agent(scout) | Codebase recon. Dispatch when the task names an area but not files, or you'd need 5+ greps/reads to orient. Returns a file map with line ranges. Fans out child scouts for areas too large for one pass. |
+| **researcher** | `claude-haiku-5-5` | WebSearch, WebFetch, Agent(researcher) | Open-ended web questions needing 3+ sources triangulated. Returns a sourced brief. Known URL? WebFetch directly instead. Fans out child researchers for independent facets. |
+| **worker** | `claude-sonnet-5-5` | Read, Write, Edit, Bash, WebSearch, WebFetch, Agent(scout, researcher, worker) | Isolated code changes — interactive dispatch or headless (`claude --agent worker`). Dispatches scout/researcher to protect its own context, and child workers for disjoint subtasks. |
+
+Models are pinned to explicit ids in each agent's frontmatter (bare `sonnet`/`haiku`
+aliases resolved to older models). The session-level roles — advisor Fable, default
+subagent model Sonnet 5.5 for built-in agents — live in the dotfiles (see Install).
 
 Prefer these over the built-in agents — scout instead of Explore, worker
 instead of general-purpose: same job, cheaper models, tighter output
@@ -60,6 +64,11 @@ Claude Code scans for agent definitions.
 **1. Get the agent files in place** — pick one:
 
 ```bash
+# 0) Mike's machines: chezmoi does it (marsmike/dotfiles) — .chezmoiexternal.toml clones this
+#    repo to ~/work/claude-subagents, private_dot_claude/agents/ symlinks the three agents, and
+#    modify_settings.json sets advisor + subagent/sonnet/haiku model env. Just:
+chezmoi init --apply marsmike/dotfiles
+
 # a) Symlink (recommended for iterating — repo edits go live immediately)
 git clone https://github.com/marsmike/claude-subagents.git
 cd claude-subagents && ./install.sh
